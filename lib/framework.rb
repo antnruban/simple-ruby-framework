@@ -54,13 +54,19 @@ class Framework
   def call_endpoint_method
     method_name = "#{@request.request_method}_#{@request.path}"
     method(method_name).arity != 0 ? public_send(method_name, @combined_params) : public_send(method_name)
-  rescue NameError => e
+  rescue => e
     handle_error_response(e)
   end
 
   def handle_error_response(exception)
-    @status, message = 500, exception.message
-    @status, message = 404, "Route `#{@request.path}` not found." if exception.message.match?(/#{GET}|#{POST}/)
+    @status = 500
+    message = exception.message
+
+    if exception.is_a?(NameError) && exception.message.match?(/#{GET}|#{POST}/)
+      @status = 404
+      message = "Route `#{@request.path}` not found."
+    end
+
     { error: message }
   end
 end
