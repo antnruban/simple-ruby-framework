@@ -3,7 +3,8 @@
 require 'framework'
 
 class Endpoint < Framework
-  headers 'Content-Type' => 'application/json', 'Custom-Header' => '*'
+  headers 'Content-Type'  => 'application/json',
+          'Custom-Header' => '*'
 
   get '/bla' do
     { results: [1, 2, 3] }

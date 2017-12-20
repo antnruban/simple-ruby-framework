@@ -33,11 +33,6 @@ class Framework
     @headers['Content-Type'] ||= 'application/json'
   end
 
-  def call_endpoint_method
-    method_name = "#{@request.request_method}_#{@request.path}"
-    method(method_name).arity != 0 ? public_send(method_name, @combined_params) : public_send(method_name)
-  end
-
   def response
     [@status, @headers, [call_endpoint_method.to_json]]
   end
@@ -54,5 +49,18 @@ class Framework
     return {} unless @request.env['CONTENT_TYPE'] == 'application/json'
 
     JSON.parse(@request.body.gets)
+  end
+
+  def call_endpoint_method
+    method_name = "#{@request.request_method}_#{@request.path}"
+    method(method_name).arity != 0 ? public_send(method_name, @combined_params) : public_send(method_name)
+  rescue NameError => e
+    handle_error_response(e)
+  end
+
+  def handle_error_response(exception)
+    @status, message = 500, exception.message
+    @status, message = 404, "Route `#{@request.path}` not found." if exception.message.match?(/#{GET}|#{POST}/)
+    { error: message }
   end
 end

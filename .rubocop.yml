@@ -9,6 +9,10 @@ Metrics/LineLength:
 Style/Documentation:
   Enabled: false
 
+# Disable parallel assignment restriction.
+Style/ParallelAssignment:
+  Enabled: false
+
 # Exclude Style/ClassVars Cop for Framework class.
 Style/ClassVars:
   Enabled: true
