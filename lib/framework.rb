@@ -1,14 +1,5 @@
 # frozen_string_literal: true
 
-require 'json'
-require 'hashie'
-
-class App
-  def self.call(env)
-    Endpoint.new(env).response
-  end
-end
-
 class Framework
   GET = 'GET'
   POST = 'POST'
@@ -63,21 +54,5 @@ class Framework
     return {} unless @request.env['CONTENT_TYPE'] == 'application/json'
 
     JSON.parse(@request.body.gets)
-  end
-end
-
-class Endpoint < Framework
-  headers 'Content-Type' => 'application/json', 'Custom-Header' => '*'
-
-  get '/bla' do
-    { results: [1, 2, 3] }
-  end
-
-  get '/' do |params|
-    { results: params }
-  end
-
-  post '/bla' do |params|
-    { name: params[:name] }
   end
 end

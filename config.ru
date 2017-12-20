@@ -1,7 +1,6 @@
 #\ -w -p 3000
 # frozen_string_literal: true
 
-# require 'rack'
-require './framework.rb'
+require_relative 'config/application'
 
-run App
+run Application

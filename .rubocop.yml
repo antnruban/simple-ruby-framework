@@ -9,8 +9,8 @@ Metrics/LineLength:
 Style/Documentation:
   Enabled: false
 
-# Exclude BlockLength Cop for specs.
+# Exclude Style/ClassVars Cop for Framework class.
 Style/ClassVars:
   Enabled: true
   Exclude:
-    - framework.rb
+    - lib/framework.rb
