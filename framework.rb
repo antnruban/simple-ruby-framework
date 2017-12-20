@@ -10,8 +10,6 @@ class App
 end
 
 class Framework
-  attr_reader :routes, :request
-
   GET = 'GET'
   POST = 'POST'
 
