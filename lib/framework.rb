@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 class Framework
-  GET = 'GET'
+  GET  = 'GET'
   POST = 'POST'
+  CONTENT_TYPE_HEADER = { name: 'Content-Type', value: 'application/json' }.freeze
 
   class << self
     @@headers = {}
@@ -30,7 +31,7 @@ class Framework
     @combined_params = combined_params
     @status = 200
     @headers = @@headers
-    @headers['Content-Type'] ||= 'application/json'
+    @headers[CONTENT_TYPE_HEADER[:name]] ||= CONTENT_TYPE_HEADER[:value]
   end
 
   def response
@@ -46,7 +47,7 @@ class Framework
   end
 
   def parse_json_body
-    return {} unless @request.env['CONTENT_TYPE'] == 'application/json'
+    return {} unless @request.content_type == CONTENT_TYPE_HEADER[:value]
 
     JSON.parse(@request.body.gets)
   end
