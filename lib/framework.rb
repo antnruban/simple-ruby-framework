@@ -1,8 +1,16 @@
 # frozen_string_literal: true
 
 class Framework
+  # HTTP methods.
   GET  = 'GET'
   POST = 'POST'
+
+  # Status codes.
+  SUCCESS_STATUS = 200
+  NOT_FOUND_STATUS = 404
+  SERVER_ERROR_STATUS = 500
+
+  # Headers.
   CONTENT_TYPE_HEADER = { name: 'Content-Type', value: 'application/json' }.freeze
 
   class << self
@@ -29,7 +37,7 @@ class Framework
   def initialize(env)
     @request = Rack::Request.new(env)
     @combined_params = combined_params
-    @status = 200
+    @status = SUCCESS_STATUS
     @headers = @@headers
     @headers[CONTENT_TYPE_HEADER[:name]] ||= CONTENT_TYPE_HEADER[:value]
   end
@@ -41,7 +49,7 @@ class Framework
   private
 
   def combined_params
-    result = Hashie::Mash.new
+    result = {}
     result.merge!(parse_json_body)
     result.merge!(@request.params)
   end
@@ -49,7 +57,7 @@ class Framework
   def parse_json_body
     return {} unless @request.content_type == CONTENT_TYPE_HEADER[:value]
 
-    JSON.parse(@request.body.gets)
+    JSON.parse(@request.body.gets, symbolize_names: true)
   end
 
   def call_endpoint_method
@@ -60,11 +68,11 @@ class Framework
   end
 
   def handle_error_response(exception)
-    @status = 500
+    @status = SERVER_ERROR_STATUS
     message = exception.message
 
     if exception.is_a?(NameError) && exception.message.match?(/#{GET}|#{POST}/)
-      @status = 404
+      @status = NOT_FOUND_STATUS
       message = "Route `#{@request.path}` not found."
     end
 
