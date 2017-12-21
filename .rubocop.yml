@@ -13,4 +13,4 @@ Style/Documentation:
 Style/ClassVars:
   Enabled: true
   Exclude:
-    - lib/framework.rb
+    - lib/framework/endpoint.rb

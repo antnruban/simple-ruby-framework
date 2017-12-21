@@ -7,6 +7,5 @@ $LOAD_PATH.unshift('lib')
 
 # Set up gems listed in the Gemfile and require they.
 require 'bundler/setup'
-require 'json'
 
 Bundler.require(:default, :development)

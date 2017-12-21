@@ -2,7 +2,7 @@
 
 require 'framework'
 
-class Endpoint < Framework
+class MyEndpoint < Framework::Endpoint
   headers 'Content-Type'  => 'application/json',
           'Custom-Header' => '*'
 

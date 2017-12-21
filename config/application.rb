@@ -4,10 +4,7 @@
 require File.expand_path('../boot', __FILE__)
 
 # Require application endpoints bellow.
-require './app/endpoint'
+require './app/my_endpoint'
 
-class Application
-  def self.call(env)
-    Endpoint.new(env).response
-  end
+class Application < Framework::Application
 end
