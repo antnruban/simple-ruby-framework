@@ -7,3 +7,7 @@ require 'framework/application'
 module Framework
   VERSION = '0.0.1'
 end
+
+# Application Erros.
+
+class UnsupportedMediaError < StandardError; end

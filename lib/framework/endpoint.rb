@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop:disable Style/ClassVars
+
 module Framework
   class Endpoint
     # HTTP methods.
@@ -40,7 +42,6 @@ module Framework
       @headers = @@headers
       @status = SUCCESS_STATUS
       @request = Rack::Request.new(env)
-      @combined_params = combined_params
       @headers[CONTENT_TYPE_HEADER[:name]] ||= CONTENT_TYPE_HEADER[:value]
     end
 
@@ -50,23 +51,27 @@ module Framework
 
     private
 
+    def call_endpoint_method
+      method_name = "#{@request.request_method}_#{@request.path}"
+      method(method_name).arity != 0 ? public_send(method_name, combined_params) : public_send(method_name)
+    rescue => e
+      error_response_handler(e)
+    end
+
     def combined_params
       result = {}
-      result.merge!(parse_json_body)
+      result.merge!(parse_json_body) unless @request.get?
       result.merge!(@request.params)
     end
 
     def parse_json_body
-      return {} unless @request.content_type == CONTENT_TYPE_HEADER[:value]
+      raise UnsupportedMediaError, Rack::Utils::HTTP_STATUS_CODES[UNSUPPORTED_TYPE_CODE] unless json_content_type?
 
       JSON.parse(@request.body.gets, symbolize_names: true)
     end
 
-    def call_endpoint_method
-      method_name = "#{@request.request_method}_#{@request.path}"
-      method(method_name).arity != 0 ? public_send(method_name, @combined_params) : public_send(method_name)
-    rescue => e
-      error_response_handler(e)
+    def json_content_type?
+      @request.content_type == CONTENT_TYPE_HEADER[:value]
     end
 
     def error_response_handler(exception)
@@ -77,6 +82,8 @@ module Framework
         @status = NOT_FOUND_STATUS
         message = "Route `#{@request.path}` not found."
       end
+
+      @status = UNSUPPORTED_TYPE_CODE if exception.is_a?(UnsupportedMediaError)
 
       { error: message }
     end
