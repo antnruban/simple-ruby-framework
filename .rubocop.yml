@@ -8,9 +8,3 @@ Metrics/LineLength:
 # Disable class documentation.
 Style/Documentation:
   Enabled: false
-
-# Exclude Style/ClassVars Cop for Framework class.
-Style/ClassVars:
-  Enabled: true
-  Exclude:
-    - lib/framework/endpoint.rb
