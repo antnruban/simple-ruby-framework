@@ -42,13 +42,15 @@ module Framework
     end
 
     def response
-      [@status, @headers, [call_endpoint_method.to_json]]
+      Rack::Response.new([call_endpoint_method.to_json], @status, @headers).finish
     end
 
     private
 
     def call_endpoint_method
       method_name = "#{@request.request_method}_#{@request.path}"
+      raise RouteNotFound, "Route `#{@request.path}` not found." unless respond_to?(method_name)
+
       method(method_name).arity != 0 ? public_send(method_name, combined_params) : public_send(method_name)
     rescue => e
       error_response_handler(e)
@@ -74,11 +76,7 @@ module Framework
       @status = SERVER_ERROR_STATUS
       message = exception.message
 
-      if exception.message.match?(/method `#{GET}|#{POST}/)
-        @status = NOT_FOUND_STATUS
-        message = "Route `#{@request.path}` not found."
-      end
-
+      @status = NOT_FOUND_STATUS      if exception.is_a?(RouteNotFound)
       @status = UNSUPPORTED_TYPE_CODE if exception.is_a?(UnsupportedMediaError)
 
       { error: message }

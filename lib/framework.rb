@@ -11,3 +11,4 @@ end
 # Application Erros.
 
 class UnsupportedMediaError < StandardError; end
+class RouteNotFound < StandardError; end
