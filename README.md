@@ -1,4 +1,4 @@
-## Simple Ruby JSON Framework
+## Simple Ruby Framework
 
 ### Description
 `TODO:` Write README.
