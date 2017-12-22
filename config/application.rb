@@ -7,4 +7,6 @@ require File.expand_path('../boot', __FILE__)
 require './app/my_endpoint'
 
 class Application < Framework::Application
+  # Mount application endpoints bellow.
+  mount MyEndpoint
 end

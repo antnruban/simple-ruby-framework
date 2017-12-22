@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop:disable Style/ClassVars
-
 module Framework
   class Endpoint
     # HTTP methods.
@@ -18,10 +16,8 @@ module Framework
     CONTENT_TYPE_HEADER = { name: 'Content-Type', value: 'application/json' }.freeze
 
     class << self
-      @@headers = {}
-
       def headers(hash)
-        @@headers = hash
+        define_method(:endpoint_headers) { hash }
       end
 
       def get(path, &bk)
@@ -39,7 +35,7 @@ module Framework
     end
 
     def initialize(env)
-      @headers = @@headers
+      @headers = endpoint_headers
       @status = SUCCESS_STATUS
       @request = Rack::Request.new(env)
       @headers[CONTENT_TYPE_HEADER[:name]] ||= CONTENT_TYPE_HEADER[:value]
