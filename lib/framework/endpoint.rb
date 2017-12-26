@@ -29,15 +29,14 @@ module Framework
       end
 
       def define_route(verb, path, &bk)
-        method_name = "#{verb}_#{path}"
-        define_method(method_name, &bk)
+        define_method("#{verb}_#{path}", &bk)
       end
     end
 
     def initialize(env)
-      @headers = endpoint_headers
       @status = SUCCESS_STATUS
       @request = Rack::Request.new(env)
+      @headers = respond_to?(:endpoint_headers) ? endpoint_headers : {}
       @headers[CONTENT_TYPE_HEADER[:name]] ||= CONTENT_TYPE_HEADER[:value]
     end
 
@@ -74,12 +73,10 @@ module Framework
 
     def error_response_handler(exception)
       @status = SERVER_ERROR_STATUS
-      message = exception.message
-
       @status = NOT_FOUND_STATUS      if exception.is_a?(RouteNotFound)
       @status = UNSUPPORTED_TYPE_CODE if exception.is_a?(UnsupportedMediaError)
 
-      { error: message }
+      { error: exception.message }
     end
   end
 end
