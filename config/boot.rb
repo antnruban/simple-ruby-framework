@@ -8,4 +8,4 @@ $LOAD_PATH.unshift('lib')
 # Set up gems listed in the Gemfile and require they.
 require 'bundler/setup'
 
-Bundler.require(:default, :development)
+Bundler.require(:default, ENV['RACK_ENV'] || :development)
