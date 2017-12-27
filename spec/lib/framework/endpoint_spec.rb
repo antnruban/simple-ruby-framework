@@ -202,10 +202,10 @@ describe 'Framework::Endpoint' do
   describe 'endpoint internal error returns' do
     let(:error_status) { 500 }
     let(:route)        { '/some_path' }
-    let(:error_body)   { [{ error: 'message' }.to_json] }
+    let(:error_body)   { [{ error: Rack::Utils::HTTP_STATUS_CODES[error_status] }.to_json] }
 
     before do
-      subject.get(route) { raise StandardError, 'message' }
+      subject.get(route) { raise StandardError }
       env['PATH_INFO'] = route
       env['REQUEST_METHOD'] = 'GET'
     end

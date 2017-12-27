@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+# rubocop: disable Style/ParallelAssignment
+
 module Framework
   class Endpoint
     # HTTP methods.
@@ -34,7 +36,7 @@ module Framework
     end
 
     def initialize(env)
-      @status = SUCCESS_STATUS
+      @status  = SUCCESS_STATUS
       @request = Rack::Request.new(env)
       @headers = respond_to?(:endpoint_headers) ? endpoint_headers : {}
       @headers[CONTENT_TYPE_HEADER[:name]] ||= CONTENT_TYPE_HEADER[:value]
@@ -72,11 +74,11 @@ module Framework
     end
 
     def error_response_handler(exception)
-      @status = SERVER_ERROR_STATUS
-      @status = NOT_FOUND_STATUS      if exception.is_a?(RouteNotFound)
-      @status = UNSUPPORTED_TYPE_CODE if exception.is_a?(UnsupportedMediaError)
+      @status, message = SERVER_ERROR_STATUS, Rack::Utils::HTTP_STATUS_CODES[SERVER_ERROR_STATUS]
+      @status, message = NOT_FOUND_STATUS, exception.message      if exception.is_a?(RouteNotFound)
+      @status, message = UNSUPPORTED_TYPE_CODE, exception.message if exception.is_a?(UnsupportedMediaError)
 
-      { error: exception.message }
+      { error: message }
     end
   end
 end
