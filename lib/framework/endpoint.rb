@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# rubocop: disable Style/ParallelAssignment
-
 module Framework
   class Endpoint
     # HTTP methods.
@@ -9,10 +7,10 @@ module Framework
     POST = 'POST'
 
     # Status codes.
-    SUCCESS_STATUS        = 200
-    NOT_FOUND_STATUS      = 404
-    UNSUPPORTED_TYPE_CODE = 415
-    SERVER_ERROR_STATUS   = 500
+    SUCCESS_STATUS          = 200
+    NOT_FOUND_STATUS        = 404
+    UNSUPPORTED_TYPE_STATUS = 415
+    SERVER_ERROR_STATUS     = 500
 
     # Headers.
     CONTENT_TYPE_HEADER = { name: 'Content-Type', value: 'application/json' }.freeze
@@ -35,6 +33,8 @@ module Framework
       end
     end
 
+    attr_reader :request
+
     def initialize(env)
       @status  = SUCCESS_STATUS
       @request = Rack::Request.new(env)
@@ -49,12 +49,13 @@ module Framework
     private
 
     def call_endpoint_method
-      method_name = "#{@request.request_method}_#{@request.path}"
-      raise RouteNotFound, "Route `#{@request.path}` not found." unless respond_to?(method_name)
+      path = @request.path
+      method_name = "#{@request.request_method}_#{path}"
+      raise RouteNotFound, "Route `#{path}` not found." unless respond_to?(method_name)
 
       method(method_name).arity != 0 ? public_send(method_name, combined_params) : public_send(method_name)
-    rescue => e
-      error_response_handler(e)
+    rescue => exception
+      error_response_handler(exception)
     end
 
     def combined_params
@@ -64,7 +65,7 @@ module Framework
     end
 
     def parse_json_body
-      raise UnsupportedMediaError, Rack::Utils::HTTP_STATUS_CODES[UNSUPPORTED_TYPE_CODE] unless json_content_type?
+      raise UnsupportedMediaError, Rack::Utils::HTTP_STATUS_CODES[UNSUPPORTED_TYPE_STATUS] unless json_content_type?
 
       JSON.parse(@request.body.gets, symbolize_names: true)
     end
@@ -74,10 +75,14 @@ module Framework
     end
 
     def error_response_handler(exception)
-      @status, message = SERVER_ERROR_STATUS, Rack::Utils::HTTP_STATUS_CODES[SERVER_ERROR_STATUS]
-      @status, message = NOT_FOUND_STATUS, exception.message      if exception.is_a?(RouteNotFound)
-      @status, message = UNSUPPORTED_TYPE_CODE, exception.message if exception.is_a?(UnsupportedMediaError)
+      return error_response(NOT_FOUND_STATUS, exception.message)        if exception.is_a?(RouteNotFound)
+      return error_response(UNSUPPORTED_TYPE_STATUS, exception.message) if exception.is_a?(UnsupportedMediaError)
 
+      error_response(SERVER_ERROR_STATUS, Rack::Utils::HTTP_STATUS_CODES[SERVER_ERROR_STATUS])
+    end
+
+    def error_response(status, message)
+      @status = status
       { error: message }
     end
   end
